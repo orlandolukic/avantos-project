@@ -1,0 +1,25 @@
+
+.controlsContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 20px;
+  margin-right: 20px;
+
+  display: flex;
+  flex-direction: row;
+
+  .control {
+    margin-right: 20px;
+  }
+
+  .revertIcon {
+    margin-top: 6px;
+
+    &.disabled {
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+  }
+}

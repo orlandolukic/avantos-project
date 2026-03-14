@@ -1,0 +1,57 @@
+
+.rightSidePanel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 450px;
+  height: 100%;
+  background: white;
+  transform: translateX(350px);
+  transition: 0.3s;
+  padding: 30px;
+
+  &.visible {
+    transform: translateX(0);
+  }
+
+  .subfields {
+    margin-top: 30px;
+
+    .subfield {
+      position: relative;
+      padding: 5px 15px;
+      border-radius: 3px;
+      border: 1px dashed rgba(0, 0, 255, 0.38);
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      transition: 0.2s;
+      cursor: pointer;
+      min-height: 25px;
+
+      &:hover {
+        background: rgba(0, 0, 255, 0.1);
+      }
+
+      &.hasSubstitution {
+        background: #e7e7e7;
+        border: none;
+      }
+
+      .icon {
+        font-size: 10px;
+      }
+
+      .text {
+        margin-left: 10px;
+      }
+
+      .close {
+        position: absolute;
+        right: 0;
+        margin-right: 10px;
+      }
+    }
+  }
+}

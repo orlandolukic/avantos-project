@@ -1,0 +1,17 @@
+
+
+.overflowPanel {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  top: 0;
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  transition: 0.3s;
+
+  &.visible {
+    opacity: 1;
+  }
+}
