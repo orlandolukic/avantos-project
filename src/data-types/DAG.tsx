@@ -2,6 +2,7 @@ import {DAGNode} from "./DAGNode";
 import {DAGConnection} from "./DAGConnection";
 import LinkedList from "./LinkedList";
 import {DAGForm} from "./DAGForm";
+import DAGSubstitution from "./DAGSubstitution";
 
 export type DAGType = {
     initialize: (paramNodes: DAGNode[], edges: DAGConnection[], paramForms: DAGForm[]) => void,
@@ -12,9 +13,9 @@ export type DAGType = {
     getNode: (id: string) => DAGNode | null,
     getForm: (id: string) => DAGForm | null,
     getNodeForForm: (form: DAGForm) => DAGNode | null,
-    getSubstitutionFor: (fieldName: string, node: DAGNode) => DAGNode | null,
+    getSubstitutionFor: (fieldName: string, node: DAGNode) => DAGSubstitution | null,
     clearSubstitutionFor: (fieldName: string, node: DAGNode) => void,
-    setSubstitutionFor: (fieldName: string, substitute: DAGNode | null, node: DAGNode | null) => void
+    setSubstitutionFor: (fieldName: string, node: DAGNode | null, substitute: DAGSubstitution | null) => void
 };
 
 export default function DAG(): DAGType {
@@ -112,13 +113,14 @@ export default function DAG(): DAGType {
                 throw new Error("Node is null");
             }
 
-
-            const index = getIndex(node.id);
-            result.push(node);
+            const ind = getIndex(node.id);
+            if (formId !== node.id) {
+                result.push(node);
+            }
 
             for (let i=0; i<nodeCount; i++) {
                 // Row is traversable, column is fixed!
-                if (adjacencyMatrix[i][index] && !present[nodes[i].id]) {
+                if (adjacencyMatrix[i][ind] && !present[nodes[i].id]) {
                     queue.insert(nodes[i]);
                     // Remove duplicates (i.e already visited nodes)!
                     present[nodes[i].id] = true;
@@ -161,10 +163,10 @@ export default function DAG(): DAGType {
         }
     }
 
-    const getSubstitutionFor = function(fieldName: string, node: DAGNode): DAGNode | null {
+    const getSubstitutionFor = function(fieldName: string, node: DAGNode): DAGSubstitution | null {
         if (node.substitutions) {
             if ( node.substitutions.hasOwnProperty(fieldName) ) {
-                return node.substitutions[fieldName] as DAGNode;
+                return node.substitutions[fieldName] as DAGSubstitution;
             } else {
                 return null;
             }
@@ -175,7 +177,7 @@ export default function DAG(): DAGType {
     const clearSubstitutionFor = function(fieldName: string, node: DAGNode): void {
         if (node.substitutions) {
             if ( node.substitutions.hasOwnProperty(fieldName) ) {
-                const newSubstitions: Record<string, DAGNode> = {};
+                const newSubstitions: Record<string, DAGSubstitution> = {};
                 for (let key in node.substitutions) {
                     // Skip this field
                     if (key === fieldName) {
@@ -189,7 +191,7 @@ export default function DAG(): DAGType {
         }
     }
 
-    const setSubstitutionFor = function(fieldName: string, substitute: DAGNode | null, node: DAGNode | null): void {
+    const setSubstitutionFor = function(fieldName:string, node: DAGNode | null, substitute: DAGSubstitution | null): void {
         if (node === null || substitute === null) {
             return;
         }

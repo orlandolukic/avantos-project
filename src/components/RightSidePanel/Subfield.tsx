@@ -4,6 +4,10 @@ import {DAGType} from "../../data-types/DAG";
 import {useCallback, useEffect, useState} from "react";
 import {DAGNode} from "../../data-types/DAGNode";
 import {DAGForm} from "../../data-types/DAGForm";
+import DAGSubstitution from "../../data-types/DAGSubstitution";
+import OverflowPanel from "../OverflowPanel/OverflowPanel";
+import {createPortal} from "react-dom";
+import Modal from "../Modal/Modal";
 
 export default function Subfield(props: any) {
 
@@ -11,27 +15,44 @@ export default function Subfield(props: any) {
     const node: DAGNode = props.node as DAGNode;
     const fieldName: string = props.name;
     const [hasSubstitution, setHasSubstitution] = useState(false);
-    const [substitutionNode, setSubstitutionNode] = useState({} as DAGNode);
+    const [substitution, setSubstitution] = useState({} as DAGSubstitution);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         // Check if there are substitutions for this form
-        const substituteNode: DAGNode | null =  dag.getSubstitutionFor(fieldName, node);
-        if (substituteNode !== null) {
+        const substitution: DAGSubstitution | null =  dag.getSubstitutionFor(fieldName, node);
+        if (substitution !== null) {
             setHasSubstitution(true);
-            setSubstitutionNode(substituteNode);
+            setSubstitution(substitution);
         }
     }, []);
 
     const clearSubstitution = useCallback(() => {
         setHasSubstitution(false);
-        setSubstitutionNode({} as DAGNode);
+        setSubstitution({} as DAGSubstitution);
         dag.clearSubstitutionFor(fieldName, node);
     }, []);
 
+    const openModal = useCallback(() => {
+        if (hasSubstitution) {
+            return;
+        }
+        setShowModal(true);
+    }, [hasSubstitution]);
+
+    const closeOverflowPanel = useCallback((index: number) => {
+        setShowModal(false);
+    }, []);
+
+    const updateSubstitution = useCallback((substitution: DAGSubstitution) => {
+        setHasSubstitution(true);
+        setSubstitution(substitution);
+    }, []);
+
     return <>
-        <div className={`${styles.subfield}${hasSubstitution ? " " + styles.hasSubstitution : ""}`} key={props.key}>
+        <div className={`${styles.subfield}${hasSubstitution ? " " + styles.hasSubstitution : ""}`} key={props.key} onClick={openModal}>
             {hasSubstitution && <>
-                <div>{substitutionNode.name}.{fieldName}</div>
+                <div>{substitution.getDisplayText()}</div>
                 <div className={styles.close} onClick={clearSubstitution}><Clear /></div>
             </>}
 
@@ -40,5 +61,16 @@ export default function Subfield(props: any) {
                 <div className={styles.text}>{props.name}</div>
             </>}
         </div>
+        {showModal && <>
+            {createPortal(<OverflowPanel overflowPanel={12} setOverflowPanel={closeOverflowPanel} />, document.getElementById("portal-container") as HTMLElement)}
+            {createPortal(<Modal
+                updateSubstitution={updateSubstitution}
+                zIndex={13}
+                closeModal={closeOverflowPanel}
+                dag={dag}
+                node={node}
+                fieldName={fieldName}
+            />, document.getElementById("portal-container") as HTMLElement)}
+        </>}
     </>
 }

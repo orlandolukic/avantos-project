@@ -1,7 +1,8 @@
 import {DAGForm} from "./DAGForm";
+import DAGSubstitution from "./DAGSubstitution";
 
 
-export interface DAGNode {
+export type DAGNode = {
     id: string;
     name: string;
     position: {
@@ -10,5 +11,5 @@ export interface DAGNode {
     };
     component_id: string;
     form: DAGForm | null;
-    substitutions: Record<string, DAGNode> | null;
+    substitutions: Record<string, DAGSubstitution> | null;
 }

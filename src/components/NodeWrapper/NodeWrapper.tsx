@@ -12,6 +12,10 @@ import {createPortal} from "react-dom";
 import OverflowPanel from "../OverflowPanel/OverflowPanel";
 import RightSidePanel from "../RightSidePanel/RightSidePanel";
 import {DAGForm} from "../../data-types/DAGForm";
+import DAGSubstitution from "../../data-types/DAGSubstitution";
+import DAGSubstitutionCustom from "../../data-types/DAGSubstitutionCustom";
+import DAGSubstitutionCustomGroup from "../../data-types/DAGSubstitutionCustomGroup";
+import DAGSubstitutionCustomGroups from "../../data-types/DAGSubstitutionCustomGroups";
 
 export default function NodeWrapper() {
 
@@ -40,7 +44,7 @@ export default function NodeWrapper() {
                 },
                 component_id: nodes[i].data.component_id,
                 form: null,                                          // it will be resolved later,
-                substitutions: {} as Record<string, DAGNode>
+                substitutions: {} as Record<string, DAGSubstitution>
             });
 
             nodesForGui.push({
@@ -84,12 +88,29 @@ export default function NodeWrapper() {
         // Let's test!
         dag.print();
 
+        const actionPropertiesGroup: DAGSubstitutionCustomGroup =
+            DAGSubstitutionCustomGroups.getInstance().getGroupById("action-properties");
+
         const nodeB: DAGNode | null = dag.getNode("form-a4750667-d774-40fb-9b0a-44f8539ff6c4");               // B
         const substituteNode: DAGNode | null = dag.getNode("form-0f58384c-4966-4ce6-9ec2-40b96d61f745");      // D
         const node: DAGNode | null =  dag.getNode("form-bad163fd-09bd-4710-ad80-245f31b797d5");               // F
+        const nodeA: DAGNode | null = dag.getNode("form-47c61d17-62b0-4c42-8ca2-0eff641c9d88");               // A
+
+        const substitution1 = new DAGSubstitution("email", "email");
+        substitution1.setSubstitution(substituteNode);
+        const substitution2: DAGSubstitution = new DAGSubstitution("dynamic_object", "dynamic_object");
+        substitution2.setSubstitution(nodeB);
+        const substitution3: DAGSubstitution = new DAGSubstitution("id", "id");
+        substitution3.setSubstitution(nodeA);
+        const substitution4: DAGSubstitution = new DAGSubstitution("multi_select", "multi_select");
+        const customSubstitution: DAGSubstitutionCustom = new DAGSubstitutionCustom(actionPropertiesGroup, 1);
+        substitution4.setSubstitution(customSubstitution);
+
         // Substitute field email for node 'node F' with form from node D
-        dag.setSubstitutionFor("email", substituteNode, node);
-        dag.setSubstitutionFor("dynamic_object", nodeB, node);
+        dag.setSubstitutionFor("email", node, substitution1);
+        dag.setSubstitutionFor("dynamic_object", node, substitution2);
+        dag.setSubstitutionFor("id", nodeB, substitution3);
+        dag.setSubstitutionFor("multi_select", nodeB, substitution4);
 
         // Now, let's test our function for node F
         const arr = dag.availableFormsFor("form-bad163fd-09bd-4710-ad80-245f31b797d5");
